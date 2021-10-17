@@ -21,10 +21,12 @@ class App extends Component {
   }
 
   async componentDidMount() {
+    this.setState({isLoading: true,})
     let foundData;
     await FetchPhotos(this.state.query, this.state.page).then((data) => {foundData = data})
     this.setState({
       data: foundData,
+      isLoading: false,
     })
   }
 
@@ -37,7 +39,6 @@ class App extends Component {
   }
 
   loadMore = async (moreData) => {
-    await this.setState({isLoading: true,})
     await this.setState((prev) => {
       return {
         data: [...prev.data, ...moreData],
@@ -47,7 +48,6 @@ class App extends Component {
       top: document.documentElement.scrollHeight,
       behavior: 'smooth',
     });
-    await this.setState({isLoading: false,})
   }
 
   annulePage = async(initialPage) => {
@@ -63,17 +63,10 @@ class App extends Component {
   }
 
   render() {
-    let loading;
-    if (this.state.isLoading) {
-      console.log("lol")
-    } else {
-      console.log("hehe")
-    }
       return (
       <>
         <Searchbar addImages={this.addImages} loadMore={this.loadMore} page={this.state.page} annulePage={ this.annulePage}/>
-          <ImagesGallery data={this.state.data} />
-          {loading}
+          {this.state.isLoading ? <Loader className="loader" type="ThreeDots" width="500px" color="#00BFFF"/> : <ImagesGallery data={this.state.data} /> }
         <Button pageCount={this.pageCount} page={ this.state.page }/>
       </>
     )
