@@ -1,25 +1,85 @@
+//* CSS *//
 import './App.scss';
+import "react-loader-spinner/dist/loader/css/react-spinner-loader.css";
+
+//* Everything else *//
 import { Component } from 'react';
-import axios from 'axios'
+import Loader from "react-loader-spinner";
 
-import Searchbar from './components/Form'
+import { Searchbar } from './components/Searchbar'
+import ImagesGallery from './components/ImagesGallery'
+import {Button} from './components/Button'
 
-const baseUrl = 'https://pixabay.com/api/';
-const api_key = '23036221-d804a8a78d7b0866edf7d8fc3';
-
-let searchQuery = '';
-let searchPage = 1;
-let url = `${baseUrl}?key=${api_key}&q=${searchQuery}&page=${searchPage}&image_type=photo&orientation=horizontal&per_page=12`
-
-axios.get(url).then((data) => {console.log(data)}).catch((err) => {console.log(err)})
+import { FetchPhotos } from './searchService';
 
 class App extends Component {
+  state = {
+    data: [],
+    page: 1,
+    query: '',
+    isLoading: false,
+  }
 
-  render() { 
-    return (
-      <Searchbar />
+  async componentDidMount() {
+    let foundData;
+    await FetchPhotos(this.state.query, this.state.page).then((data) => {foundData = data})
+    this.setState({
+      data: foundData,
+    })
+  }
+
+  addImages = (arrData) => {
+    this.setState(() => {
+      return {
+        data: arrData,
+      }
+    })
+  }
+
+  loadMore = async (moreData) => {
+    await this.setState({isLoading: true,})
+    await this.setState((prev) => {
+      return {
+        data: [...prev.data, ...moreData],
+      }
+    })
+    window.scrollTo({
+      top: document.documentElement.scrollHeight,
+      behavior: 'smooth',
+    });
+    await this.setState({isLoading: false,})
+  }
+
+  annulePage = async(initialPage) => {
+    await this.setState({page: initialPage,})
+  }
+
+  pageCount = (pageNumber) => {
+    this.setState(() => {
+      return {
+        page: pageNumber,
+      }
+    })
+  }
+
+  render() {
+    let loading;
+    if (this.state.isLoading) {
+      console.log("lol")
+    } else {
+      console.log("hehe")
+    }
+      return (
+      <>
+        <Searchbar addImages={this.addImages} loadMore={this.loadMore} page={this.state.page} annulePage={ this.annulePage}/>
+          <ImagesGallery data={this.state.data} />
+          {loading}
+        <Button pageCount={this.pageCount} page={ this.state.page }/>
+      </>
     )
   }
+  
 }
+
 
 export default App;
