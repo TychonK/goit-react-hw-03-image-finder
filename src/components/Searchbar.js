@@ -10,9 +10,12 @@ export class Searchbar extends Component {
     async componentDidUpdate() {
         if (this.state.page != this.props.page) {
            await this.setState({ page: this.props.page, })
-
+            let isLoading = true;
+            this.props.isLoading(isLoading)
             let newData;
             await FetchPhotos(this.state.query, this.state.page).then((data) => { newData = data })
+            isLoading = false;
+            this.props.isLoading(isLoading)
             this.props.loadMore(newData)
         }
     }
